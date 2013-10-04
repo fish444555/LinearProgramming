@@ -1,0 +1,199 @@
+class LP:
+    def readfile(self,exp):
+        '''
+        read the file from txt format, transform them into 
+        the format we can deal with 
+        '''
+        f = open(exp)
+        k = 0
+        detail = []
+        for line in f.readlines():
+            line2 = line.replace('\n','')
+            line2 = line2.split(' ')
+            co = line2.count('')
+            while co:
+                line2.remove('')
+                co = co-1
+            #print line2
+            temp = []
+            for i in line2:
+                if k<3:
+                    temp.append(int(i))
+                else:
+                    temp.append(float(i))
+            k = k+1
+            if len(temp) > 0 :
+                detail.append(temp)
+        self.val = detail
+                
+    def find_ent_lea(self):
+        '''
+        the effect as the function name
+        '''
+        x = self.val
+        z = x[-1][1:]                    #last line, begin from 1:end
+
+        l2 = x[2][:]
+        l2.sort()
+        l = len(l2)
+        i = 0
+        while i<l:                    #find the small non-base number great than 0, at the same time,
+            if z[x[2].index(l2[i])]>0:        #prevent var not in the right order
+                #print "z.index(zz[i]) = " ,z[x[2].index(l2[i])]
+                y = x[2].index(l2[i])
+                break
+            i = i+1
+        
+        entry = x[2][y]
+        #print entry
+        i = x[0][0]
+        j = 0
+        res = ['']*i
+        l1 = x[1][:]
+        l1.sort()
+        
+        while i>0:                    #find leaving number
+            if x[4+x[1].index(l1[j])][y] >= 0:
+                res[j] = ' '
+            else:
+                res[j] = -x[3][x[1].index(l1[j])]/x[4+x[1].index(l1[j])][y]
+            j = j+1
+            i = i-1
+        result = min(res)
+        if result == ' ':
+            leave = 'Unbounded'
+            obj = 'n/a'
+            print entry,leave,obj
+        else:
+            #print result 
+            indx_r = res.index(min(res))
+            leave = l1[indx_r]
+            indx_r = x[1].index(l1[indx_r])
+            #print res,entry,leave,indx_r,result    
+        
+            obj = x[-1][0]+1.0*x[-1][1:][y]*result    #obj result
+        return entry,leave,obj
+    
+    def change_dir(self,(in_entry,in_leave,in_obj),in_x):
+        entry,leave,obj = (in_entry,in_leave,in_obj)
+        x = in_x 
+        f_le = x[1].index(leave)        #find the formulate has entry & leave
+        ent_idx = x[2].index(entry)    #find idx of entry
+        coef = x[4+f_le][ent_idx]
+        x[2].remove(entry)
+        x[2].insert(ent_idx,leave)
+        #x[2].append(leave)
+        #x[2].sort()
+        
+        x[1].insert(x[1].index(leave),entry)
+        x[1].remove(leave)
+        
+        #x[1].append(entry)
+        #x[1].sort()
+        
+        lea_idx = x[2].index(leave)
+        del x[4+f_le][ent_idx]
+        x[4+f_le].insert(lea_idx,-1.0)
+        j = 0
+        for i in x[4+f_le]:
+            x[4+f_le][j] = x[4+f_le][j]/coef*(-1.0)
+            j = j+1
+        
+        x[3][f_le] = x[3][f_le]/coef*(-1.0)
+        flag = ['f']*(len(x)-5)                #5 respect for the first 4 lines and the last one,they are not fomulations
+        flag[f_le] = 't'
+        j = 0
+        while j<(len(x)-5):        #change other formulations
+            if flag[j]=='f' and x[4+j][ent_idx] != 0:
+                temp = []
+                temp2 = []
+                x[3][j] = x[3][j]+x[4+j][ent_idx]*x[3][f_le]        #change coefficient
+                for k in x[4+f_le]:
+                    temp.append(k*x[4+j][ent_idx])
+                    
+                x[4+j][ent_idx] = 0
+                for m in range(len(x[4+j])):
+                    x[4+j][m] = x[4+j][m] + temp[m]
+                
+            j += 1
+           
+        # change object
+        j = 0
+        temp = x[-1][ent_idx+1]
+        x[-1][ent_idx+1] = 0
+        while j<x[0][1]:
+            x[-1][j+1] += temp * x[4+f_le][j]
+            j += 1
+        x[-1][0] = x[-1][0] + temp * x[3][f_le]
+        self.val = x
+
+    def print_res(self):
+        print self.val
+class B:
+    def do2(self):
+        print 'i\'m B'
+        
+#class C(A,B):
+#    pass
+
+'''
+import sys
+text = sys.stdin.read()
+words = text.split()
+wordcount = len(words)
+print 'wordcount:' ,wordcount
+''' 
+'''
+import pprint
+f = open('/home/fish/test/python/test.txt')
+pprint.pprint(f.read())
+f.close()
+
+import fileinput
+for line in fileinput.input('/home/fish/test/python/test.txt'):
+    print line
+'''
+import math
+correct_res = [(4,3,7.0),(2,3,4.0),(1,6,2.0),(1,5,3.0),(3,2,2.0),(1,'Unbounded','n/a'),(5,2,6.0),(2,8,1.5077),(1,9,0.1436),(2,13,0.08286)]
+
+ta = LP()
+#ta.readfile('/home/fish/test/python/test.txt')
+#print ta.find_ent_lea()
+correct_res2 = [[7.0,3],[4.0,1],[3.0,2],[28.0,3],[60.0,4],['UNBOUNDED'],[6.0,1],[6.729522,2],[0.272727,2],[9.332270,18]]
+for m in range(0,5):
+    #ta.readfile(('/home/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/2/part2TestCases/unitTests/dict%s')%(str(m+1)))
+    
+    ta.readfile(('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/2/part2TestCases/assignmentParts/part%s.dict')%(str(m+1)))
+    k = 0
+    flag = True
+    j = 1
+    while flag:
+        temp = ta.find_ent_lea()
+        if temp[1] == 'Unbounded':
+            ta.val = 'UNBOUNDED'
+            break
+        ta.change_dir(temp, ta.val)
+        #print tcor1[k]==ta.val
+        k += 1
+        
+        for i in ta.val[-1][1:]:
+            if i>0:
+                flag = True
+                j += 1
+                break
+            flag = False
+    #print 'dic%s'%(str(m+1)),'      ' , ta.val[-1][0],'     ',j,'     ',ta.val == 'UNBOUNDED' or abs(correct_res2[m][0] - ta.val[-1][0])<0.001 and correct_res2[m][1] == j 
+    print 'dic%s'%(str(m+1)),'      ' , ta.val[-1][0],'     ',j,'     ',ta.val 
+    #temp = ta.find_ent_lea()
+    #print 
+
+
+#for i in ta.val:
+#    print i
+#ta.readfile('/home/fish/test/python/test.txt')
+#ta.readfile('/home/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/2/part2TestCases/unitTests/dict2')
+#print ta.find_ent_lea()
+tcor1 = []
+tcor1 = [[[3,4],[1,4,6],[2,3,5,7],[1.0,3.0,0.0],[0.0,0.0,-1.0,-2.0],[1.0,-1.0,0.0,-1.0],[-1.0,0.0,-2.0,0.0],[7.0,1.0,-2.0,3.0,-1.0]],
+        [[3,4],[1,4,2],[6,3,5,7],[1.0,3.0,0.0],[0.0,0.0,-1.0,-2.0],[-1.0,-1.0,-2.0,-1.0],[-1.0,0.0,-2.0,0.0],[7.0,-1.0,-2.0,1.0,-1.0]],
+        [[3,4],[1,4,5],[6,3,2,7],[1.0,3.0,0.0],[0.5,0.0,0.5,-2.0],[0.0,-1.0,1.0,-1.0],[-0.5,0.0,-0.5,0.0],[7,-1.5,-2.0,-0.5,-1.0]]]
