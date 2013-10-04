@@ -1,0 +1,4 @@
+LinearProgramming
+=================
+
+homework of LP
