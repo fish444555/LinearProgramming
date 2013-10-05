@@ -75,6 +75,9 @@ for m in range(0,10):
             flag = False
         if flag == False:
             if p3_c.val[2].count(0) == 1:
-                print 'idict%s = '%(str(m+1)),0.0
+                correct_flag = correct_flag and abs(0.0-correct_res3[m])<0.001
+                #print 'idict%s = '%(str(m+1)),0.0
             else:
-                print 'idict%s = '%(str(m+1))
+                correct_flag = correct_flag and abs(p3_c.val[-1][0]-correct_res3[m])<0.001
+                #print 'idict%s = '%(str(m+1))
+print 'correct_flag3 = ', correct_flag
