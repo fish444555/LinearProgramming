@@ -1,0 +1,80 @@
+'''
+Created on 2013,10,4
+
+This file is the homework of the LP(LinearAndIntegerProgramming) of week four.
+
+@author: fish
+'''
+import p2
+class p3(p2.LP):
+    def add_x0(self):
+        self.val[0][1] += 1 
+        self.val[2].append(0)
+        for i in range(self.val[0][0]):
+            self.val[4+i].append(1.0)
+        self.addval = self.val[-1][:]
+        for i in range(len(self.val[-1])):
+            self.val[-1][i] = 0.0
+        self.val[-1].append(-1.0)
+        
+ta = p2.LP()
+
+correct_res2 = [[7.0,3],[4.0,1],[3.0,2],[28.0,3],[60.0,4],['UNBOUNDED'],[6.0,1],[6.729522,2],[0.272727,2],[9.332270,18]]
+correct_flag = True
+for m in range(0,10):
+    ta.readfile(('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/2/part2TestCases/unitTests/dict%s')%(str(m+1)))
+    k = 0
+    flag = True
+    j = 1
+    while flag:
+        temp = ta.find_ent_lea(0)
+        if temp[1] == 'Unbounded':
+            ta.val = 'UNBOUNDED'
+            break
+        ta.change_dir(temp, ta.val)
+        k += 1
+        
+        for i in ta.val[-1][1:]:
+            if i>0:
+                flag = True
+                j += 1
+                break
+            flag = False
+#     print 'dic%s'%(str(m+1)),'      ' , ta.val[-1][0],'     ',j,'     ',ta.val == 'UNBOUNDED' or abs(correct_res2[m][0] - ta.val[-1][0])<0.001 and correct_res2[m][1] == j
+    correct_flag = correct_flag and ta.val == 'UNBOUNDED' or abs(correct_res2[m][0] - ta.val[-1][0])<0.001 and correct_res2[m][1] == j
+print 'correct_flag = ' ,correct_flag
+
+
+correct_res3 = [0.0, 0.0, -1.0, 0.0, -12.0, 0.0, 0.0, -2.163889, -2.355023, 0.0]
+for m in range(0,10):
+    p3_c = p3()
+    p3_c.readfile(('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/3/initializationTests/unitTests/idict%s')%(str(m+1)))
+#     print p3_c.val
+    p3_c.add_x0()
+#     print p3_c.val
+#     print p3_c.addval
+    k = 0
+    flag = True
+    j = 1
+    while flag:
+        if k == 0:
+            temp = p3_c.find_ent_lea(1)     #add x0
+        else:
+            temp = p3_c.find_ent_lea(0)            
+        if temp[1] == 'Unbounded':
+            ta.val = 'UNBOUNDED'
+            break
+        p3_c.change_dir(temp, p3_c.val)
+        k += 1
+        
+        for i in p3_c.val[-1][1:]:
+            if i>0:
+                flag = True
+                j += 1
+                break
+            flag = False
+        if flag == False:
+            if p3_c.val[2].count(0) == 1:
+                print 'idict%s = '%(str(m+1)),0.0
+            else:
+                print 'idict%s = '%(str(m+1))
