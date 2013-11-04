@@ -1,0 +1,91 @@
+'''
+Created on 2013-11-3
+
+@author: fish
+'''
+import p2
+import numpy as np
+class P4(p2.LP):
+    def get_final(self):
+        '''
+        get the final dictionary
+        '''
+        flag = True
+        while flag:
+            temp = self.find_ent_lea(0)
+            if temp[1] == 'Unbounded':
+                self.val = 'UNBOUNDED'
+                break
+            self.change_dir(temp, self.val)
+                
+            for i in self.val[-1][1:]:
+                if i>0:
+                    flag = True#             j += 1
+                    break
+                flag = False
+        self.dic = self.val
+
+    def CuttingPlane(self, dic):
+        '''
+        add the new constrain formulation
+        '''
+        add_idx = -1
+        for i in dic[3]:
+            if i <> int(i):
+                add_idx = dic[3].index(i)
+        if add_idx == -1:
+            print 'alread find the result'
+        else:
+            add_list = []
+            new_dic = dic[:]
+            add_val = (new_dic[3][add_idx]-int(new_dic[3][add_idx])) * -1
+            for i in new_dic[4+add_idx]:
+                if i > 0:
+                    add_list.append(i - np.floor(i))
+                else:
+                    add_list.append((i + np.ceil(i)) * -1)
+            new_dic.insert(-1,add_list)
+            new_dic[0][0] = new_dic[0][0] + 1
+            temp = new_dic[1][:] + new_dic[2][:]
+            new_dic[1].append(max(temp) + 1)
+            new_dic[3].append(add_val)
+            self.dic = new_dic 
+        return new_dic
+    
+    def PrimToDual(self, in_new_dic):
+        '''
+        change to dual dictionary
+        '''
+        new_dic = in_new_dic
+        dual_dic = []
+        dual_dic.append(new_dic[0][::-1])
+        dual_dic.append(new_dic[2][:])
+        dual_dic.append(new_dic[1][:])
+        dual_dic.append(list(np.array(new_dic[-1][1:]) * (-1)))
+        temp_mat = np.array(new_dic[4:-1]).T * -1
+        for i in range(np.shape(temp_mat)[0]):
+            dual_dic.append(list(temp_mat[i]))
+        dual_dic.append(list(np.array([new_dic[-1][0]] + new_dic[3][:]) * -1))
+        self.dic = dual_dic 
+        return dual_dic
+
+    def CheckFinal(self, in_res):
+        '''
+        check whether the dictionary satisfy the conditions
+        '''
+        res = in_res
+        for i in range(len(res)):
+            if i <> int(i):
+                return 0
+        return 1
+        
+p4 = P4()
+p4.readfile('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/4/ilpTests/unitTests/ilpTest1')
+p4.dic = p4.val[:] 
+#print p4.dic
+while p4.CheckFinal(p4.dic[3]):
+    p4.get_final()
+    new_dic = p4.CuttingPlane(p4.dic)
+    print new_dic
+    print p4.PrimToDual(new_dic)
+
