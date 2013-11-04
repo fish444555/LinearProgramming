@@ -1,0 +1,31 @@
+import p2
+glp = p2.LP()
+glp.readfile('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/4/ilpTests/unitTests/ilpTest1')
+
+
+nvar = glp.val[0][0] + glp.val[0][1]
+write_file = []
+for i in range(nvar):
+    write_file.append('var x%d  integer >=0 ;\n'%(i+1))
+temp = 'maximize obj: ' + str(glp.val[-1][0])
+for i in range(len(glp.val[-1]) - 1):
+    temp += ' + '
+    temp += str(glp.val[-1][i + 1])
+    temp += '* x%s'%(i + 1)
+write_file.append(temp+';'+'\n')
+temp = []
+for i in range(glp.val[0][0]):
+    temp = 'c%s: x%s = ' %(i + 1, i + glp.val[0][0] + 1)
+    temp += str(glp.val[3][i])
+    for j in range(glp.val[0][1]):
+        temp += ' + '
+        temp += str(glp.val[4+i][j]) + ' * x%s' %(j+1)
+    write_file.append(temp+';'+'\n')
+write_file.append('solve; '+'\n')
+write_file.append('display'+write_file[4][13:]+'\n')
+write_file.append('end;'+'\n')
+
+
+fw = open('t_write_file.txt','w')
+fw.writelines(write_file)
+fw.close()
