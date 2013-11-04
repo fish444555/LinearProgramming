@@ -16,6 +16,8 @@ class P4(p2.LP):
             if temp[1] == 'Unbounded':
                 self.val = 'UNBOUNDED'
                 break
+            elif temp[0] == -1:
+                break                
             self.change_dir(temp, self.val)
                 
             for i in self.val[-1][1:]:
@@ -23,7 +25,7 @@ class P4(p2.LP):
                     flag = True#             j += 1
                     break
                 flag = False
-        self.dic = self.val
+#         self.dic = self.val
 
     def CuttingPlane(self, dic):
         '''
@@ -41,7 +43,7 @@ class P4(p2.LP):
             add_val = (new_dic[3][add_idx]-int(new_dic[3][add_idx])) * -1
             for i in new_dic[4+add_idx]:
                 if i > 0:
-                    add_list.append(i - np.floor(i))
+                    add_list.append(1 - i - np.floor(i))
                 else:
                     add_list.append((i + np.ceil(i)) * -1)
             new_dic.insert(-1,add_list)
@@ -49,8 +51,8 @@ class P4(p2.LP):
             temp = new_dic[1][:] + new_dic[2][:]
             new_dic[1].append(max(temp) + 1)
             new_dic[3].append(add_val)
-            self.dic = new_dic 
-        return new_dic
+            self.val = new_dic 
+#         return new_dic
     
     def PrimToDual(self, in_new_dic):
         '''
@@ -66,26 +68,43 @@ class P4(p2.LP):
         for i in range(np.shape(temp_mat)[0]):
             dual_dic.append(list(temp_mat[i]))
         dual_dic.append(list(np.array([new_dic[-1][0]] + new_dic[3][:]) * -1))
-        self.dic = dual_dic 
-        return dual_dic
+        self.val = dual_dic 
+#         return dual_dic
 
     def CheckFinal(self, in_res):
         '''
         check whether the dictionary satisfy the conditions
         '''
         res = in_res
-        for i in range(len(res)):
+        flag = True
+        for i in res:
             if i <> int(i):
-                return 0
-        return 1
+                return flag
+        return not flag
         
 p4 = P4()
 p4.readfile('/media/User_Data/fish/coursera/ColoradoBoulder/LinearAndIntegerProgramming/programming/4/ilpTests/unitTests/ilpTest1')
-p4.dic = p4.val[:] 
+# p4.dic = p4.val 
 #print p4.dic
-while p4.CheckFinal(p4.dic[3]):
+i = 1
+primal = True 
+while True:
+    print i
     p4.get_final()
-    new_dic = p4.CuttingPlane(p4.dic)
-    print new_dic
-    print p4.PrimToDual(new_dic)
+    if not primal:
+        p4.PrimToDual(p4.val)
+        primal = not primal
+        print 'dual', p4.val
+    if primal and p4.CheckFinal(p4.val[3]) == False:
+        break    
+    print 'final', p4.val
+    new_dic = p4.CuttingPlane(p4.val)
+    print 'cut', p4.val
+    p4.PrimToDual(p4.val)
+    primal = not primal
+    print 'dual', p4.val    
+    i += 1
+    
+print 'The final result is %f' %p4.val[-1][0]
+    
 
