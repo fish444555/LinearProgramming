@@ -22,7 +22,7 @@ for i in range(glp.val[0][0]):
         temp += str(glp.val[4+i][j]) + ' * x%s' %(j+1)
     write_file.append(temp+';'+'\n')
 write_file.append('solve; '+'\n')
-write_file.append('display'+write_file[4][13:]+'\n')
+write_file.append('display'+write_file[nvar][13:]+'\n')
 write_file.append('end;'+'\n')
 
 
